@@ -1,0 +1,28 @@
+digraph Tree {
+node [shape=box] ;
+0 [label="HAVE_CRYPTO <= 0.5\nmse = 180.2152\nsamples = 90\nvalue = 9.499"] ;
+1 [label="PS1K <= 0.5\nmse = 0.211\nsamples = 51\nvalue = 0.7151"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label="PS4K <= 0.5\nmse = 0.2364\nsamples = 39\nvalue = 0.8101"] ;
+1 -> 2 ;
+3 [label="HAVE_HASH <= 0.5\nmse = 0.2808\nsamples = 23\nvalue = 1.0313"] ;
+2 -> 3 ;
+4 [label="mse = 0.0366\nsamples = 11\nvalue = 0.7007"] ;
+3 -> 4 ;
+5 [label="mse = 0.3126\nsamples = 12\nvalue = 1.3342"] ;
+3 -> 5 ;
+6 [label="mse = 0.0012\nsamples = 16\nvalue = 0.4921"] ;
+2 -> 6 ;
+7 [label="mse = 0.0041\nsamples = 12\nvalue = 0.4066"] ;
+1 -> 7 ;
+8 [label="PS32K <= 0.5\nmse = 182.7694\nsamples = 39\nvalue = 20.9855"] ;
+0 -> 8 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+9 [label="PS16K <= 0.5\nmse = 49.3658\nsamples = 26\nvalue = 12.3328"] ;
+8 -> 9 ;
+10 [label="mse = 10.0779\nsamples = 16\nvalue = 7.1486"] ;
+9 -> 10 ;
+11 [label="mse = 0.4209\nsamples = 10\nvalue = 20.6276"] ;
+9 -> 11 ;
+12 [label="mse = 0.3665\nsamples = 13\nvalue = 38.2908"] ;
+8 -> 12 ;
+}
