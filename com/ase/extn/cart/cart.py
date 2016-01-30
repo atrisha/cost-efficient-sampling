@@ -22,9 +22,9 @@ system = 'apache'
 thismodule = sys.modules[__name__]
 loc = os.path.dirname(__file__)
 
-base_dir = os.path.join(loc,'data\\')
-base_dir_in = base_dir+'input\\'
-base_dir_out = base_dir+'output\\'
+base_dir = os.path.join(loc,'data')
+base_dir_in = os.path.join(base_dir,'input')
+base_dir_out = os.path.join(base_dir,'output')
 
 all_systems = ['apache','bc','bj','llvm','sqlite','x264']
 '''
@@ -48,18 +48,18 @@ def get_min_params(training_set_size):
         
    
 def load_data():
-    fname = base_dir_in+system
+    fname = os.path.join(base_dir_in,system)
     num_features = range(0,details_map[system][0])
     data = np.loadtxt(fname,  delimiter=',', dtype=bytes,skiprows=1,usecols=num_features).astype(str)
     return data
 
 def load_perf_values():
-    fname = base_dir_in+system
+    fname = os.path.join(base_dir_in,system)
     data = np.loadtxt(fname,  delimiter=',', dtype=float,skiprows=1,usecols=(details_map[system][0],))
     return data
 
 def load_feature_names():
-    fname = base_dir_in+system
+    fname = os.path.join(base_dir_in,system)
     f = open(fname).readline().rstrip('\n').split(',',details_map[system][0])
     return f[:len(f)-1]
     
@@ -110,7 +110,7 @@ def progressive(system_val):
             results[i][j] = calc_accuracy(out,perf_values[test_set_indices])
         print('['+system+']' + " iteration :"+str(j+1))
     print()
-    out_file = open(base_dir_out+system+"_out_"+strategy,'w')
+    out_file = open(os.path.join(base_dir_out,system)+"_out_"+strategy,'w')
     out_file.truncate()
     
     for i in range(results.shape[0]):
