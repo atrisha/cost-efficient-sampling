@@ -17,7 +17,7 @@ strategy = projective|progressive
 system = all|apache|bc|bj|llvm|sqlite|x264
 '''
 strategy = "projective"
-system = 'all'
+system = 'apache'
 
 thismodule = sys.modules[__name__]
 loc = os.path.dirname(__file__)
