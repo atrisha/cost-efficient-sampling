@@ -16,7 +16,7 @@ A. For progressive sampling, individual output files are created under data/oupu
 	System-id : <system under execution>
 	Size of lambda set: <size of the data points used for the projected learning curve>
 	------------------------------------------------------------------
-	{<projected curve> : [<correlation value>, <optimal sample size>]}
+	{<projected curve> : [<correlation value>, <optimal sample size>, <accuracy of prediction with optimal sample size>, <standard deviation>]}
 
 
 Q. Where do I feed in the input files?<br />

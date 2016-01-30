@@ -17,7 +17,7 @@ strategy = projective|progressive
 system = all|apache|bc|bj|llvm|sqlite|x264
 '''
 strategy = "projective"
-system = 'apache'
+system = 'all'
 
 thismodule = sys.modules[__name__]
 loc = os.path.dirname(__file__)
@@ -151,6 +151,24 @@ def smooth(result_array):
     result_array[:,1] = fault_rates
     return result_array
 
+def get_projected_accuracy(size,repeat,data,perf_values):
+    results = np.empty((1,repeat))
+    for j in range(repeat):
+        np.random.seed(j)
+        training_set_indices = np.random.choice(data.shape[0],size,replace=False)
+        diff_indices = set(range(data.shape[0])) - set(training_set_indices)
+        training_set = data[training_set_indices]
+        test_set_indices = np.random.choice(np.array(list(diff_indices)),size,replace=False)
+        test_set = data[test_set_indices]
+        X = training_set
+        y = perf_values[training_set_indices]
+        built_tree = cart(X, y)
+        out = predict(built_tree, test_set, perf_values[test_set_indices])
+        results[0][j] = 100 - calc_accuracy(out,perf_values[test_set_indices])
+    mean = results.mean()
+    sd = np.std(results)
+    return (mean,sd)
+        
 def get_optimal(a,b,r,s,curve):
     if curve=='log':
         n = -(r*s*b)/2
@@ -256,16 +274,27 @@ def projective(system_val):
     curve_data = transform_axes(smooth(dict_to_array(results)))
     correlation_data = dict()
     for keys in curve_data:
-        fit_result = sp.stats.linregress(curve_data[keys][1:,0],curve_data[keys][1:,1])
-        value_a = get_intercept(fit_result.intercept,keys)
-        value_b = get_slope(fit_result.slope,keys)
+        slope, intercept, rvalue, pvalue, stderr = sp.stats.linregress(curve_data[keys][1:,0],curve_data[keys][1:,1])
+        value_a = get_intercept(intercept,keys)
+        value_b = get_slope(slope,keys)
         value_r = 1
         value_s = details_map[system][1]/3
         optimal_size = get_optimal(value_a,value_b,value_r,value_s,keys)
-        correlation_data[keys] = [fit_result.rvalue,int(optimal_size)]
-    print("---------------------------------------------------------------")
-    print("{<Projected curve> : [<Correlation value>, <Optimal Sample Size>]}")
-    print(correlation_data)
+        if optimal_size <= data.shape[0]//2:
+            mean_accu,sd = get_projected_accuracy(optimal_size,repeat,data,perf_values)
+        else:
+            mean_accu,sd = (None,None)
+        correlation_data[keys] = {'correlation' : rvalue,
+                                  'optimal sample size' :int(optimal_size),
+                                  'accuracy' :mean_accu,
+                                  'standard deviation' :sd}
+    print()
+    print('Detailed learning projections:')
+    print('<curve-id> : {<details>}')
+    print()
+    for keys in correlation_data:
+        print(str(keys) +":"+str(correlation_data[keys]))
+    print("-----------------------------------------------")
     print()
  
 def main():           
