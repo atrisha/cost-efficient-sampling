@@ -13,7 +13,7 @@ from numpy import mean
 
 '''
 Set 
-strategy = projective|progrssive
+strategy = projective|progressive
 system = all|apache|bc|bj|llvm|sqlite|x264
 '''
 strategy = "projective"
