@@ -10,28 +10,31 @@ import os
 import math as math
 from sklearn import tree
 from numpy import mean
+from com.ase.extn.constants import configs
 
 '''
 Set 
 strategy = projective|progressive
 system = all|apache|bc|bj|llvm|sqlite|x264
 '''
-strategy = "projective"
-system = 'apache'
+strategy = configs.strategy
+system = configs.system
 
 thismodule = sys.modules[__name__]
-loc = os.path.dirname(__file__)
+loc = configs.loc
 
-base_dir = os.path.join(loc,'data')
-base_dir_in = os.path.join(base_dir,'input')
-base_dir_out = os.path.join(base_dir,'output')
+base_dir = configs.base_dir
+base_dir_in = configs.base_dir_in
+base_dir_out = configs.base_dir_out
 
-all_systems = ['apache','bc','bj','llvm','sqlite','x264']
+all_systems = configs.all_systems
+print_detail = True
+
 '''
 details_map holds the following data-
 details_map = {<system-id> :[<no_of_features>,<size_of_sample_space>]}
 '''
-details_map = {"apache" : [9,192], "llvm" : [11,1024], "x264" : [16,1152], "bc" : [18,2560], "bj" : [26,180], "sqlite" : [39,4553]}
+details_map = configs.details_map
 
 
 def get_min_params(training_set_size):
@@ -160,6 +163,7 @@ def get_projected_accuracy(size,repeat,data,perf_values):
         training_set = data[training_set_indices]
         test_set_indices = np.random.choice(np.array(list(diff_indices)),size,replace=False)
         test_set = data[test_set_indices]
+        
         X = training_set
         y = perf_values[training_set_indices]
         built_tree = cart(X, y)
@@ -171,14 +175,17 @@ def get_projected_accuracy(size,repeat,data,perf_values):
         
 def get_optimal(a,b,r,s,curve):
     if curve=='log':
-        n = -(r*s*b)/2
+        n = -(r*s*b)/configs.th
     elif curve=='weiss':
-        n = np.power(((-r*s*b)/2),0.5)
+        n = np.power(((-r*s*b)/configs.th),0.5)
     elif curve=='power':
-        n = np.power((-2/(r*s*a*b)),(1/(b-1)))
+        n = np.power((-configs.th/(r*s*a*b)),(1/(b-1)))
     elif curve=='exp':
-        n = math.log((-2/(r*s*(a*(np.log(b))))),b)    
+        n = math.log((-configs.th/(r*s*(a*(np.log(b))))),b)    
     return n
+
+def cost_eqn(th,n,e,s,r):
+    return (th*n + (e*r*s))
 
 def get_intercept(intercept,curve):
     if curve=='power' or curve=='exp':
@@ -191,9 +198,23 @@ def get_slope(slope,curve):
         return np.exp(slope)
     else:
         return slope
+
+def select_curve(correlation_data):
+    curve = ''
+    min_corr = 1
+    for keys in correlation_data:
+        if float(correlation_data[keys]['correlation']) < min_corr and correlation_data[keys]['accuracy'] is not None:
+            min_corr = float(correlation_data[keys]['correlation'])
+    for keys in correlation_data:
+        if float(correlation_data[keys]['correlation']) == min_corr:
+            curve = keys
+    return curve    
                 
 def projective(system_val):
-    print('System-id : '+system_val)
+    if print_detail is True:
+        print('System-id : '+system_val)
+        print('R value : '+str(configs.r))
+        print('th value : '+str(configs.th))
     global system
     system = system_val
     data = load_data()
@@ -266,7 +287,8 @@ def projective(system_val):
             results_hold[size] = sum(results[size])/float(len(results[size]))
             
     results=results_hold
-    print('Size of lambda set: '+ str(len(results)))    
+    if print_detail is True:
+        print('Size of lambda set: '+ str(len(results)))    
     '''
     Transform the axes and calculate pearson correlation with
     each learning curve
@@ -277,25 +299,44 @@ def projective(system_val):
         slope, intercept, rvalue, pvalue, stderr = sp.stats.linregress(curve_data[keys][1:,0],curve_data[keys][1:,1])
         value_a = get_intercept(intercept,keys)
         value_b = get_slope(slope,keys)
-        value_r = 1
+        value_r = configs.r
         value_s = details_map[system][1]/3
         optimal_size = get_optimal(value_a,value_b,value_r,value_s,keys)
-        if optimal_size <= data.shape[0]//2:
+        
+        if optimal_size <= data.shape[0]//configs.th and optimal_size > 0:
             mean_accu,sd = get_projected_accuracy(optimal_size,repeat,data,perf_values)
+            r = configs.r
+            th = configs.th
+            total_cost = cost_eqn(th,optimal_size, 100-float(mean_accu), details_map[system][1]//3, r)
+            
         else:
-            mean_accu,sd = (None,None)
+            mean_accu,sd,total_cost = (None,None,None)
+        
         correlation_data[keys] = {'correlation' : rvalue,
                                   'optimal sample size' :int(optimal_size),
                                   'accuracy' :mean_accu,
-                                  'standard deviation' :sd}
-    print()
-    print('Detailed learning projections:')
-    print('<curve-id> : {<details>}')
-    print()
+                                  'standard deviation' :sd,
+                                  'total cost' :total_cost}
+    selected_curve = select_curve(correlation_data)
+    if print_detail is True:
+        print()
+        print('Detailed learning projections:')
+        print('<curve-id> : {<details>}')
+        print()
+        
     for keys in correlation_data:
-        print(str(keys) +":"+str(correlation_data[keys]))
-    print("-----------------------------------------------")
-    print()
+        if keys == selected_curve:
+            correlation_data[keys]['selected'] = True
+            if print_detail is True:
+                print(str(keys) +"**:"+str(correlation_data[keys]))
+        else:
+            correlation_data[keys]['selected'] = False
+            if print_detail is True:
+                print(str(keys) +":"+str(correlation_data[keys]))
+    if print_detail is True:            
+        print("-----------------------------------------------")
+        print()
+    return correlation_data
  
 def main():           
     if system=='all':
@@ -304,6 +345,5 @@ def main():
             func(i)
     else:
         func = getattr(thismodule, strategy)
-        func(system)
+        return func(system)     
 
-main()        
