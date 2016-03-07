@@ -22,11 +22,7 @@ for i in range(1, len(fault_rates)-1):
 
 
 
-c = np.append(a,b,0)
-print(c.shape)
-
-aa=1.74829641413
-bb=1.00656332598
-r=1
-s=341.33333333333
-
+y = range(12)
+z = str('aaa') + str('bbb')
+    
+print(int(2.1234))

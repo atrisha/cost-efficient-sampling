@@ -6,32 +6,80 @@ Created on 2016-02-04
 
 from SALib.sample import sobol_sequence
 from com.ase.extn.cart import base
+from com.ase.extn.tway import twaysample
 from com.ase.extn.constants import configs
 import numpy as np
+import collections
+import matplotlib.pyplot as plt
 
+sensitivity = 'r'
 
-param_values = sobol_sequence.sample(10, 1)
-param_values = np.append(param_values,1)
+if sensitivity is 'r':
+    param_values_0_1 = sobol_sequence.sample(10, 1)
+    param_values_1_10 = (1 + (9*param_values_0_1))
+    param_values = np.append(np.append(param_values_0_1,param_values_1_10),1)
+    param_values.sort()
+else:
+    param_values = [2,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3]
+
 base.print_detail = False
 
-sens_data = dict()
+
+sens_data_ff = collections.OrderedDict()
+sens_data_2w = collections.OrderedDict()
+sens_data_3w = collections.OrderedDict()
+sens_data_pg = collections.OrderedDict()
 print("System-id : "+str(configs.system))
+
 for values in param_values:
-    if values <= 1 and values >=.1:
-        if configs.r_0_to_1 is not True:
-            configs.r = float(1 + (9*values))
-        else:
+    if values <= 10 and values >=.1:
+        print(values)
+        if sensitivity is 'r':
             configs.r = float(values)
-        correlation_data = base.main()
-        for keys in correlation_data:
-            if correlation_data[keys]['selected'] is True:
-                data_list = [keys,correlation_data[keys]['correlation'],correlation_data[keys]['optimal sample size'],correlation_data[keys]['accuracy'],
-                             correlation_data[keys]['standard deviation'],correlation_data[keys]['total cost']]
-                ''' If optimal sample size is found to be more than the maximal score set (no. of un-measured configurations)
-                then, it is not a great idea to use the prediction model. maximal score set = total configs - (training + testing)
-                or = total configs - th*(training))'''
-                if correlation_data[keys]['optimal sample size'] > (configs.details_map[configs.system][1] - (configs.th * correlation_data[keys]['optimal sample size'])) or correlation_data[keys]['optimal sample size'] < 1:
-                    data_list.append('UNR')
-                print(str(configs.r) + " - " + str(data_list))  
-        sens_data[str(configs.r)] = data_list       
-                    
+        else:
+            configs.th = values
+        size_result,success,p_value,cost_result,opt_size_result_ff = base.projective(configs.system)  
+        sens_data_ff[values] = cost_result,success,opt_size_result_ff       
+        configs.tway = 2
+        size_result,success,p_value,cost_result,opt_size_result_2w = twaysample.sample(configs.system)  
+        sens_data_2w[values] = cost_result,success,opt_size_result_2w
+        configs.tway = 3
+        size_result,success,p_value,cost_result,opt_size_result_3w = twaysample.sample(configs.system)  
+        sens_data_3w[values] = cost_result,success,opt_size_result_3w
+        configs.strategy = 'progressive'
+        data_list,opt_cost,real_cost = base.progressive(configs.system) 
+        sens_data_pg[values] = (opt_cost,real_cost)
+
+x_data,y_ff,y_2w,y_3w,y_re = [],[],[],[],[]        
+for key in sens_data_ff:
+    x_data.append(float(key))
+    y_ff.append(sens_data_ff[key][0][2])
+    print('feature frequencies: ',key,'-',sens_data_ff[key])
+    y_2w.append(sens_data_2w[key][0][2])
+    print('2way: ',key,'-',sens_data_2w[key])
+    y_3w.append(sens_data_3w[key][0][2])
+    print('3way: ',key,'-',sens_data_3w[key])
+    y_re.append(sens_data_pg[key][1])
+    print('Progressive,Real: ',key,'-',sens_data_pg[key])
+    print()
+    
+plt.plot(x_data,y_ff,'go-')
+i=0
+for x in x_data:
+    if x>=1:
+        plt.text(x, y_ff[i], str(int(sens_data_ff[x][2])))
+    i=i+1
+plt.plot(x_data,y_2w,'bo-')
+i=0
+for x in x_data:
+    if x>=1:
+        plt.text(x, y_2w[i], str(int(sens_data_2w[x][2])))
+    i=i+1
+plt.plot(x_data,y_3w,'mo-')
+i=0
+for x in x_data:
+    if x>=1:
+        plt.text(x, y_3w[i], str(int(sens_data_3w[x][2])))
+    i=i+1
+plt.plot(x_data,y_re,'ro-')    
+plt.show()        
