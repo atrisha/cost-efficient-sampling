@@ -158,45 +158,51 @@ def progressive(system_val):
     if configs.show_actual_lc is True:
         local_xdata = []
         local_ydata = []
+    opt_found = False
     for i in range(results.shape[0]):
         size = (i+1)*10
         error = mean(results[i])
         out_file.write(str(size)+","+ str(error))
         out_file.write('\n')
         if configs.plot is True or configs.plot_real_cost is True:
-            plot.x_data.append(size)
+            plot.x_data_prog.append(size)
             if configs.show_actual_lc is True:
                 local_xdata.append(size)
             if configs.plot_real_cost is False:
                 if error > 100:
-                    plot.y_data.append(100-100)
+                    plot.y_data_prog.append(100-100)
                     if configs.show_actual_lc is True:
                         local_ydata.append(100-100)
                 else:
-                    plot.y_data.append(100-error)
+                    plot.y_data_prog.append(100-error)
                     if configs.show_actual_lc is True:
                         local_ydata.append(100-error)
+                        
         if configs.calc_prog_opt is True:
             R = configs.r
             S = configs.details_map[system][1]//3    
             cost_curr = cost_eqn(configs.th,size,error,S,R)
             cost_list.append(cost_curr)
             if configs.plot_real_cost is True:
-                plot.y_data.append(cost_curr)
-            if cost_curr > cost_prev and plot.opt_size==0:
+                plot.y_data_prog.append(cost_curr)
+            if cost_curr > cost_prev and opt_found is False:
                 plot.opt_size = size_prev
                 plot.opt_accu = acc_prev
                 plot.opt_cost = cost_prev
                 opt_cost = cost_prev
+                opt_found = True
             else:
                 cost_prev = cost_curr
                 size_prev = size
                 acc_prev = 100-error    
         if configs.show_actual_lc is True:
             data_list.append((local_xdata,local_ydata))        
+    real_cost = min(cost_list)
+    plot.real_min_cost = real_cost
+    if configs.print_detail is True:
+        print('Accuracy at optimal:',acc_prev)
     if configs.plot is True and configs.strategy == 'progressive':
         plot.plot_now()   
-    real_cost = min(cost_list)     
     return data_list,opt_cost,real_cost
             
         
@@ -688,6 +694,7 @@ def mean_corr_list(corr_list):
     cost_list = []
     lambda_size_list = []
     optimal_sample_list = []
+    accu_list = []
     for entry in corr_list:
         for keys in entry:
             if keys in corr_summary:
@@ -706,25 +713,35 @@ def mean_corr_list(corr_list):
                 if entry[keys]['total cost'] is not None:
                     cost_list.append(float(entry[keys]['total cost']))
                     optimal_sample_list.append(float(entry[keys]['optimal sample size']))
+                    accu_list.append(float(entry[keys]['accuracy']))
                     
         if len(list(entry.values())) > 0:
-            lambda_size_list.append(int(list(entry.values())[0]['lambda size']))        
-    cost_result = np.percentile(cost_list,25),np.percentile(cost_list,75),np.median(cost_list)
-    size_result = np.percentile(lambda_size_list,25),np.percentile(lambda_size_list,75),np.median(lambda_size_list)
-    opt_size_result = np.mean(optimal_sample_list)
-    if print_detail is True:
-        print('Cost - 25-pc,75-pc,Med : ',cost_result)
-        print(summary)
-    actual_obs = dict_to_array(summary)[:,1].astype(int)
-    success = str(sum(summary.values())) + '/' + str(configs.repeat)
-    exp_obs = commonutils.get_random_distribution(sum(summary.values()), len(dict_to_array(summary)[:,1]))[0].astype(int)
-    chisq,p = chisquare(actual_obs,exp_obs)
-    if print_detail is True:
-        print('p-value',p)
-    for keys in corr_summary:
-        mu, std = norm.fit(corr_summary[keys])
-        '''corr_summary[keys].append('Mean : ' + str(mu) + ', std : '+ str(std)+ ', min : '+ str(max(corr_summary[keys]))+ ', med : '+ str(np.median(corr_summary[keys])))'''
-    return size_result,success,p,cost_result,opt_size_result
+            lambda_size_list.append(int(list(entry.values())[0]['lambda size']))    
+    if len(cost_list) > 0:
+        if configs.show_box_pl is False:        
+            cost_result = np.percentile(cost_list,25),np.percentile(cost_list,75),np.median(cost_list)
+        else:
+            cost_result = cost_list
+        size_result = np.percentile(lambda_size_list,25),np.percentile(lambda_size_list,75),np.median(lambda_size_list)
+        opt_size_result = np.mean(optimal_sample_list)
+        accu_result = np.mean(accu_list)
+        if print_detail is True:
+            print('Cost - 25-pc,75-pc,Med : ',cost_result)
+            print(summary)
+        actual_obs = dict_to_array(summary)[:,1].astype(int)
+        success = str(sum(summary.values())) + '/' + str(configs.repeat)
+        exp_obs = commonutils.get_random_distribution(sum(summary.values()), len(dict_to_array(summary)[:,1]))[0].astype(int)
+        chisq,p = chisquare(actual_obs,exp_obs)
+        p = p,summary,exp_obs
+        if print_detail is True:
+            print('p-value',p)
+        for keys in corr_summary:
+            mu, std = norm.fit(corr_summary[keys])
+            '''corr_summary[keys].append('Mean : ' + str(mu) + ', std : '+ str(std)+ ', min : '+ str(max(corr_summary[keys]))+ ', med : '+ str(np.median(corr_summary[keys])))'''
+        return size_result,accu_result,p,cost_result,opt_size_result
+    else:
+        return None
+    
 
 def main():           
     if system=='all':

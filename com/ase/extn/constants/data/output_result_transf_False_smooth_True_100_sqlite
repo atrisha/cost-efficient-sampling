@@ -1,0 +1,43 @@
+sqlite-feature-frequencies-3: (nan, {'exp': 100}, array([100]))
+Cost Result : (7360.9498546816449, 7735.1409526101979, 7594.4148784456274)
+Size : (251.75, 547.5, 371.5)
+Opt Size : 1263.4962209
+Success rate : 96.7187339504
+sqlite-feature-frequencies-4: (nan, {'exp': 100}, array([100]))
+Cost Result : (7419.851929261743, 7751.6065915508334, 7654.0613664023804)
+Size : (356.5, 687.5, 494.5)
+Opt Size : 1294.753459
+Success rate : 96.7337957678
+sqlite-feature-frequencies-5: (nan, {'exp': 99}, array([99]))
+Cost Result : (7399.4291036776995, 7701.6363669979646, 7604.7056059482566)
+Size : (531.5, 873.75, 671.5)
+Opt Size : 1301.84812853
+Success rate : 96.7472404396
+sqlite-feature-frequencies-6: (nan, {'exp': 100}, array([100]))
+Cost Result : (6980.4464825044661, 7610.3899351382252, 7338.5692429791416)
+Size : (726.0, 1049.0, 894.5)
+Opt Size : 1070.94015602
+Success rate : 96.5903218384
+
+sqlite-2way: (nan, {'exp': 100}, array([100]))
+Cost Result : (1850.128115646547, 1941.8136351239539, 1869.7797263906059)
+Size : (21.0, 21.0, 21.0)
+Opt Size : 52.389316862
+Success rate : 98.8187353351
+
+sqlite-3way: (nan, {'exp': 100}, array([100]))
+Cost Result : (1295.4131887805681, 1305.0941643897231, 1299.696827113577)
+Size : (60.0, 60.0, 60.0)
+Opt Size : 125.686887569
+Success rate : 99.308083736
+
+Actual min cost : 6716.64987102
+Progressive min cost : 6716.64987102
+---------------------------------------------
+
+
+Apache:
+	ff	2	3
+ff	-
+2		-	
+3			-

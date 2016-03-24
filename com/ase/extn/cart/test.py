@@ -6,6 +6,7 @@ Created on 2016-01-26
 import numpy as np
 import scipy.stats as sp
 import math
+from scipy.stats import chisquare
 
 def all_true(list):
     for i in list:
@@ -20,9 +21,15 @@ fault_rates = a[:,1]
 for i in range(1, len(fault_rates)-1):
     fault_rates[i] = (fault_rates[i-1] + fault_rates[i] + fault_rates[i+1])/3    
 
+dat = dict()
+fat = dict()
+dat[1] = 'aaa'
+dat[2] = 'bbb'
+fat['d'] = 'fff'
+fat['g'] = 'ttt'
+l = []
 
-
-y = range(12)
-z = str('aaa') + str('bbb')
-    
-print(int(2.1234))
+def append(a,b):
+    return str(a) + '-' + str(b)
+g = map(append,list(dat.keys()),list(fat.keys()))
+print(list(g))
