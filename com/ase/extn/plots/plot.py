@@ -42,7 +42,6 @@ def plot_now():
             plt.annotate(s='n*:'+str(opt_size),xy=(opt_size,opt_cost))
         else:
             plt.plot(opt_size,opt_accu,'bo')
-            plt.plot(x_data_prog[y_data_prog.index(real_min_cost)],real_min_cost,'k^',markersize=10)
             plt.annotate(s='n*:'+str(opt_size),xy=(opt_size,opt_accu))
         plt.show()
         opt_size = 0

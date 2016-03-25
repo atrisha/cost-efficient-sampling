@@ -22,7 +22,7 @@ all_systems = ['apache','bc','bj','llvm','x264','sqlite']
 
 '''Strategy is progressive|projective'''
 strategy = 'projective'
-system = 'sqlite'
+system = 'apache'
 
 ''' This adds a,b to the correaltion data structure'''
 track_detail = True
@@ -32,7 +32,7 @@ fix_test_set = True
 fix_test_ratio = 3
 
 ''' Plot cost instead of accuracy ; Works only with progressive'''
-plot_real_cost = True
+plot_real_cost = False
 '''' Highlight the optimal sample size'''
 calc_prog_opt = True
 

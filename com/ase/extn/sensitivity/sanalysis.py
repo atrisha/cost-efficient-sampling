@@ -16,9 +16,11 @@ sensitivity = 'th'
 
 if sensitivity is 'r':
     param_values_0_1 = sobol_sequence.sample(10, 1)
-    print(param_values_0_1)
     param_values_1_10 = (1 + (9*param_values_0_1))
-    param_values = np.append(param_values_0_1,1)
+    if configs.r_0_to_1 is True:
+        param_values = np.append(param_values_0_1,1)
+    else:
+        param_values = np.append(param_values_1_10,1)
     param_values.sort()
 else:
     param_values = 2 + sobol_sequence.sample(10, 1)
