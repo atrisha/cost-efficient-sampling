@@ -1,26 +1,44 @@
 # ASE_extn
 
-Q. How do I run the script?<br />
-A. Execute com.ase.extn.cart.cart.py
-
-Q. What parameters do I need to set in the script?<br />
-A. Edit com.ase.extn.cart.cart.py to modify following variables -
-
-	- strategy = 'projective'|'progressive'
-	- system = 'all'|'apache'|'bc'|'bj'|'llvm'|'sqlite'|'x264'
-
-Q. How can I interpret the results?<br />
-A. For progressive sampling, individual output files are created under data/ouput for each system. These files contain a mapping between sample size and fault rate.
-   For projective sampling, results are displayed in the console in the following format:
-	
-	System-id : <system under execution>
-	Size of lambda set: <size of the data points used for the projected learning curve>
-	------------------------------------------------------------------
-	{<projected curve> : [<correlation value>, <optimal sample size>, <accuracy of prediction with optimal sample size>, <standard deviation>]}
-
-
 Q. Where do I feed in the input files?<br />
-A. Input files are read from data/input
+A. Input files are read from com.ase.extn.constants.data.input
+
+Q: How can I execute progressive sampling?<br />
+A: Set the following parameters in com.ase.extn.constants.configs.py -
+	-strategy = ’progressive’
+	-system = ’apache’|’bc’|’bj’|’llvm’|’x264’|’sqlite’|’all’
+To display figures : plot = True
+To display learning curve: plot real cost = False
+To display cost curve: plot real cost = True
+Execute com.ase.extn.cart.base.py
+Results are generated under com.ase.extn.constants.data.output
+
+Q: How can I execute projective sampling?<br />
+A: Set the following parameters in com.ase.extn.constants.configs.py
+	-strategy = ’projective’
+	-system = ’apache’|’bc’|’bj’|’llvm’|’x264’|’sqlite’|’all’
+	-print detail = True
+To display figures : plot = True
+Execute com.ase.extn.cart.base.py
+Results are displayed in the console
+
+Q. How to setup the parameters for projective sampling?<br />
+A.
+Cost-ratio (R) : r = <value>
+Feature-frequency threshold (thresh freq) : projective feature threshold = <value>
+Multiplier for training-testing set split (θ) : th = <value>
+
+Q. How to run t-way sampling?<br />
+A. Set the following parameters in com.ase.extn.constants.configs.py
+	-tway = 2 | 3
+Execute com.ase.extn.tway.twaysample.py
+Results are displayed in the console
+
+Q. How to run sensitivity analysis?<br />
+A. Set the following parameters in com.ase.extn.sensitivity.sanalysis.py
+	-sensitivity = ’r’ | ’th’
+	-com.ase.extn.constants.configs.r 0 to 1 = True : For SA in the interval [0,1] for R
+
 
 Q. Where can I get further details?<br />
-A. http://gsd.uwaterloo.ca/sites/default/files/PID3840471.pdf
+A. https://uwspace.uwaterloo.ca/bitstream/handle/10012/10406/Sarkar_Atri.pdf?sequence=3
