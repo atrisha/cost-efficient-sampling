@@ -12,7 +12,7 @@ import numpy as np
 import collections
 import matplotlib.pyplot as plt
 
-sensitivity = 'th'
+sensitivity = 'r'
 
 if sensitivity is 'r':
     param_values_0_1 = sobol_sequence.sample(10, 1)

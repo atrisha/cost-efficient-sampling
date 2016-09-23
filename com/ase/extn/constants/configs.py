@@ -22,7 +22,7 @@ all_systems = ['apache','bc','bj','llvm','x264','sqlite']
 
 '''Strategy is progressive|projective'''
 strategy = 'projective'
-system = 'apache'
+system = 'sqlite'
 
 ''' This adds a,b to the correaltion data structure'''
 track_detail = True
@@ -45,15 +45,15 @@ show_box_pl = False
 
 smooth = True
 ''' Plot the data '''
-plot = True
-print_detail = True
+plot = False
+print_detail = False
 
 transform_lambda = False
 add_origin_to_lambda = True
 extend_lambda = False
 
-projective_feature_threshold = 2
-repeat = 10
+projective_feature_threshold = 5
+repeat = 100
 
 ''' Which prediction model to use'''
 model = 'cart'

@@ -32,4 +32,8 @@ l = []
 def append(a,b):
     return str(a) + '-' + str(b)
 g = map(append,list(dat.keys()),list(fat.keys()))
-print(list(g))
+a = range(31)
+
+for r in range(31):
+    print(r)
+    
