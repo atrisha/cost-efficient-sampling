@@ -40,5 +40,3 @@ A. Set the following parameters in com.ase.extn.sensitivity.sanalysis.py<br />
 	-com.ase.extn.constants.configs.r 0 to 1 = True : For SA in the interval [0,1] for R<br />
 
 
-Q. Where can I get further details?<br />
-A. https://uwspace.uwaterloo.ca/bitstream/handle/10012/10406/Sarkar_Atri.pdf?sequence=3<br />
